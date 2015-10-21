@@ -1,84 +1,123 @@
 <!doctype html>
 <html class="no-js" lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tech's Kitchen</title>
-    <link rel="stylesheet" href="css/foundation.css" />
-    <link rel="stylesheet" href="css/master.css" />
-    <link type="image/x-icon" rel="shortcut icon" href="/img/TechsLogoSq.png">
-  </head>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Tech's Kitchen</title>
+        <link rel="stylesheet" href="css/foundation.css" />
+        <link rel="stylesheet" href="css/master.css" />
+        <link type="image/x-icon" rel="shortcut icon" href="/img/TechsLogoSq.png">
+    </head>
 
-  <body>
+    <body>
 
-  <div id="wrap">    
-    <div class="contain-to-grid">      
-      <nav class="top-bar" role="navigation" data-topbar>
-	<ul class="title-area">
-	  <li class="name"><a href="/"><img class="menuImg" src="/img/TechsLogo.png"></a></li>
-	  <li class="toggle-topbar menu-icon"><a href="#"><span>Menu</span></a></li>
-	</ul>
-	<section class="top-bar-section">
-	  <ul class="right">
-	    <li id="admin" class=""><a href="#">Admin</a></li>
-	    <li id="add-recipe" class=""><a href="#">Add a Recipe</a></li>
-	    <li id="login" class=""><a href="#">Login</a></li>
-	  </ul>
-	</section>
-      </nav>
-    </div>
+        <div class="contain-to-grid">
+            <nav class="top-bar" role="navigation" data-topbar>
+                <ul class="title-area">
+                    <li class="name"><a href="/"><img class="menuImg" src="/img/TechsLogo.png"></a></li>
+                    <li class="toggle-topbar menu-icon"><a href="#"><span>Menu</span></a></li>
+                </ul>
+                <section class="top-bar-section">
+                    <ul class="right">
+                        <li id="adminButton" class="hide"><a href="#">Admin</a></li>
+                        <li id="addRecipeButton" class="hide"><a href="#">Add a Recipe</a></li>
+                        <li id="loginButton" class="show"><a href="#">Login/Join</a></li>
+                        <li id="logoutButton" class="hide"><a href="#">Logout</a></li>
+                    </ul>
+                </section>
+            </nav>
+        </div>
 
-<!--    <div class="row hide-for-medium-up collapse"> -->
-    <div class="row collapse">
-      <div class="small-5 small-offset-4 medium-offset-5 large-offset-6 columns">
-	<input type="text" id="recipeSearch" placeholder="Search for a recipe">
-      </div>
-      <div class="small-3 medium-2 large-1 columns">
-        <a href="#" class="recipe-search"><span class="postfix">Search</span></a>
-      </div>
-    </div>
+        <div class="row collapse">
+            <div class="small-5 small-offset-4 medium-offset-5 large-offset-6 columns">
+                <input type="text" id="recipeSearch" placeholder="Search for a recipe">
+            </div>
+            <div class="small-3 medium-2 large-1 columns">
+                <a href="#" class="recipe-search"><span class="postfix">Search</span></a>
+            </div>
+        </div>
 
-    <div class="row hide-for-large-up">
-      <div class="small-12 columns">
-	Browse by:
-	<ul class="inline-list category-list">
-	  <li id="categoryBrowse"><a href="#">Category</a></li>
-	  <li id="mealBrowse"><a href='#'>Meal</a></li>
-	  <li id="addRecipe"><a href="#">Cuisine</a></li>
-	  <li id="login"><a href="#">Season</a></li>
-	</ul>
-      </div>
-    </div>
-    
-    <div class="row">
-      <div class="medium-2 columns show-for-large-up">
-	Browse by:
-	<ul class="side-nav category-list">
-	  <li id="categoryBrowse"><a href="#">Category</a></li>
-	  <li id="mealBrowse"><a href="#">Meal</a></li>
-	  <li id="addRecipe"><a href="#">Cuisine</a></li>
-	  <li id="login"><a href="#">Season</a></li>
-	</ul>
-      </div>
-      <div class="small-12 medium-10 columns" id="mainContent">
-      </div>
-    </div>
-    <div id="push"></div>
-	</div>
-	<!-- end wrap -->
+        <div class="row hide-for-large-up admin-funcs hide">
+            <div class="small-12 columns">
+                Admin functions:
+                <ul class="inline-list category-list">
+                    <li class="adminUsersButton"><a href="#">Users</a></li>
+                    <li class="adminRecipeButton"><a href="#">Recipes</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="row hide-for-large-up">
+            <div class="small-12 columns">
+                Browse by:
+                <ul class="inline-list category-list">
+                    <li class="browseButton" data-function="category"><a href="#">Category</a></li>
+                    <li class="browseButton" data-function="meal"><a href='#'>Meal</a></li>
+                    <li class="browseButton" data-function="cuisine"><a href="#">Cuisine</a></li>
+                    <li class="browseButton" data-function="season"><a href="#">Season</a></li>
+                </ul>
+            </div>
+        </div>
 
-	<div id="footer">
-		Fixed footer
-	</div>
-  </body>
+        <div class="row">
 
-  <script src="js/vendor/modernizr.js"></script>
-  <script src="js/vendor/jquery.js"></script>
-  <script src="js/foundation/foundation.js"></script>
-  <script src="js/foundation/foundation.topbar.js"></script>
-  <script src="js/master.js"></script>
-  
-  <script>
-    $(document).foundation();
-  </script>
+            <div class="medium-2 columns show-for-large-up">
+                <div class="row admin-funcs hide">
+                    <div class="small-12 columns">
+                        Admin functions:
+                        <ul class="side-nav category-list">
+                            <li class="adminUsersButton"><a href="#">Users</a></li>
+                            <li class="adminRecipeButton"><a href="#">Recipes</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="small-12 columns">
+                        Browse by:
+                        <ul class="side-nav category-list">
+                            <li class="browseButton" data-function="category"><a href="#">Category</a></li>
+                            <li class="browseButton" data-function="meal"><a href='#'>Meal</a></li>
+                            <li class="browseButton" data-function="cuisine"><a href="#">Cuisine</a></li>
+                            <li class="browseButton" data-function="season"><a href="#">Season</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="small-12 medium-10 columns" id="mainContent">
+            </div>
+        </div>
+
+        <footer class="footer" id="footer">
+            <div class="row">
+                <div class="small-4 columns">
+                    <h6>About</h6>
+                    techskitchen
+                </div>
+                <div class="small-4 columns">
+                    <h6>Contact Me</h6>
+                </div>
+                <div class="small-4 columns">
+                    <h6></h6>
+
+                </div>
+            </div>
+            <br />
+            <div class="row">
+                <div class="small-12 columns">
+                    <p id="copyright-statement">Content Copyright 2015, Tech's Kitchen, Oakmont, PA, USA</p>
+                </div>
+            </div>
+        </footer>
+
+    </body>
+
+    <script src="js/vendor/modernizr.js"></script>
+    <script src="js/vendor/jquery.js"></script>
+    <script src="js/foundation/foundation.js"></script>
+    <script src="js/foundation/foundation.topbar.js"></script>
+    <script src="js/master.js"></script>
+
+    <script>
+        $(document).foundation();
+    </script>
 </html>
