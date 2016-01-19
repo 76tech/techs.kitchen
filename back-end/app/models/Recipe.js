@@ -8,13 +8,13 @@ var Recipe = {
   categories: [],
   DB: techskitchen
   collection: recipes
-  
+
 */
 function saveRecipe(callback) {
   callback();
 }
 
-function deleteRecipe() {
+function deleteRecipe(callback) {
   callback();
 }
 

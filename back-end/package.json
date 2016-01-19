@@ -9,7 +9,6 @@
   "author": "Ben Snyder",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.13.3",
-    "express-json": "^1.0.0"
+    "restify": "^4.0.3"
   }
 }
