@@ -9,6 +9,7 @@
   "author": "Ben Snyder",
   "license": "ISC",
   "dependencies": {
+    "lodash": "^4.0.0",
     "restify": "^4.0.3"
   }
 }
