@@ -44,6 +44,12 @@ var testRecipes = [
 }
 ];
 
+// find all recipes
+function findRecipes(callback) {
+  var err = null;
+  callback(err, testRecipes);
+}
+
 function saveRecipe(callback) {
   callback();
 }
@@ -52,11 +58,13 @@ function deleteRecipe(callback) {
   callback();
 }
 
-// find all recipes
-function findRecipes(callback) {
+// returns all categories and their values
+function getCategoriesAndValues(callback) {
   var err = null;
-  callback(err, testRecipes);
+  callback(err, _.map(testRecipes, 'categories'));
+  callback(null, getAllCategoryValues('meal'));
 }
+
 
 // return one recipe by ID
 function findOneRecipe(id,callback) {
@@ -65,11 +73,6 @@ function findOneRecipe(id,callback) {
   callback(err, recipe);
 }
 
-// returns all categories and their values
-function getCategoriesAndValues(callback) {
-  var err = null;
-  callback(null, getAllCategoryValues('meal'));
-}
 
 function getCategoryValues(categoryName,callack) {
   //get value where recipe.categories.name=categoryName;
