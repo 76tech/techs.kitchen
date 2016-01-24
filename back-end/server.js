@@ -20,6 +20,7 @@ server.post('/', function(req, res) {
 });
 
 // Recipe handling
+// return all recipes
 server.get('/recipes', function(req,res) {
   Recipe.findRecipes(function(err,recipes) {
     if(err)
@@ -30,8 +31,32 @@ server.get('/recipes', function(req,res) {
 
 // create new recipe
 server.post('/recipes', function(req,res) {
-  console.log(req.params.name);
-  res.json({message: 'Recipe created'});//, body: JSON.stringify(req.body)});
+  console.log(req.params);
+  Recipe.createRecipe(req.params, function(err,resp) {
+    if(err)
+      res.send(err);
+    res.json(resp);
+  });
+});
+
+//save a recipe
+server.put('/recipes', function(req,res) {
+  console.log(req.params);
+  Recipe.saveRecipe(req.params, function(err,resp) {
+    if(err)
+      res.send(err);
+    res.json(resp);
+  });
+});
+
+// delete a recipe
+server.del('/recipes/:id', function(req,res) {
+  console.log(req.params);
+  Recipe.deleteRecipe(req.params.id, function(err,resp) {
+    if(err)
+      res.send(err);
+    res.json(resp);
+  });
 });
 
 // Recipes by ID handling
@@ -65,10 +90,10 @@ server.get('/categories/:category', function(req,res) {
 // returns all recipes matching a category and value
 // ex. /recipes/meal/dinner
 server.get('/recipes/:category/:value', function(req,res) {
-  Recipe.findByCategory(req.params.category,req.params.value, function(err,recipe) {
+  Recipe.findByCategory(req.params.category,req.params.value, function(err,recipes) {
     if(err)
       res.send(err);
-    res.json(recipe);
+    res.json(recipes);
   });
 });
 

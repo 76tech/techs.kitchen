@@ -50,21 +50,20 @@ function findRecipes(callback) {
   callback(err, testRecipes);
 }
 
-function saveRecipe(callback) {
-  callback();
-}
-
-function deleteRecipe(callback) {
-  callback();
-}
-
-// returns all categories and their values
-function getCategoriesAndValues(callback) {
+function createRecipe(params, callback) {
   var err = null;
-  callback(err, _.map(testRecipes, 'categories'));
-  callback(null, getAllCategoryValues('meal'));
+  callback(err,{message: 'Recipe created'});
 }
 
+function saveRecipe(params, callback) {
+  var err = null;
+  callback(err,{message: 'Recipe saved'});
+}
+
+function deleteRecipe(id, callback) {
+  var err = null;
+  callback(err,{message: 'Recipe deleted'});
+}
 
 // return one recipe by ID
 function findOneRecipe(id,callback) {
@@ -73,14 +72,42 @@ function findOneRecipe(id,callback) {
   callback(err, recipe);
 }
 
+// returns all categories and their values
+function getCategoriesAndValues(callback) {
+  var err = null;
 
-function getCategoryValues(categoryName,callack) {
+  var categories = [];
+  var roughCats = _.flatten(_.map(testRecipes, 'categories'));
+  _.each(_.flatten(_.map(testRecipes, 'categories')), function(category) {
+    var catIdx = _.findIndex(categories, {"name":category.name});
+    if ( catIdx == -1 ) {
+      categories.push({"name":category.name, "values":[]});
+      catIdx = _.findIndex(categories, {"name":category.name});
+    }
+    if ( _.indexOf(categories[catIdx].values, category.value) == -1 ) {
+      categories[catIdx].values.push(category.value);
+    }
+  });
+  callback(err, categories);
+}
+
+// get all values for a category
+function getCategoryValues(categoryName,callback) {
   //get value where recipe.categories.name=categoryName;
-
   var err = null;
   callback(err,_.union(_.map(_.filter(_.union.apply(_, _.map(testRecipes, 'categories')), {'name':categoryName}),'value')));
 }
+
+// returns list of recipes matching category and value
+function findByCategory(categoryName,categoryValue,callback) {
+  //get value where recipe.categories.name=categoryName;
+  var err = null;
+  callback(err, _.filter(testRecipes, {"categories.name":categoryName, "categories.value":categoryValue}));
+//  callback(err,_.union(_.map(_.filter(_.union.apply(_, _.map(testRecipes, 'categories')), {'name':categoryName}),'value')));
+}
+
 //-----------------------------------
+/*
 function getListOfRecipeIds() {
   return Object.keys(testRecipes);
 }
@@ -95,25 +122,25 @@ function getRecipeCategories(recipeId) {
   return recipe.categories;
 }
 
-// returns all categories and their values
 function getCategories(callback) {
   var err = null;
   callback(null, _.union.apply(_, getListOfRecipeIds().map(getRecipeCategoryNames) ) );
 }
+*/
 
 
-
-function findByCategory(category,value,callback) {
-  var err = null;
-  callback(err, [{'category':category,'value':value,'name':'water'}]);
-}
+//function findByCategory(category,value,callback) {
+//  var err = null;
+//  callback(err, [{'category':category,'value':value,'name':'water'}]);
+//}
 
 //};
 
 //module.exports = Recipe;
-module.exports.saveRecipe = saveRecipe;
-module.exports.deleteRecipe = deleteRecipe;
 module.exports.findRecipes = findRecipes;
+module.exports.saveRecipe = saveRecipe;
+module.exports.createRecipe = createRecipe;
+module.exports.deleteRecipe = deleteRecipe;
 module.exports.findOneRecipe = findOneRecipe;
 module.exports.getCategoriesAndValues = getCategoriesAndValues;
 module.exports.getCategoryValues = getCategoryValues;
