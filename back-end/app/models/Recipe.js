@@ -41,6 +41,17 @@ var testRecipes = [
   'categories':[{'name':'cuisine','value':'Italian'},
                 {'name':'meal','value':'dinner'},
                 {'name':'course','value':'main'}]
+},
+{
+  'id':3,
+  'name':'Loko Momo (Igloo Bread)',
+  'description':'Steamed yeast breads',
+  'ingredients':['flour','yeast','water'],
+  'method':['tbd'],
+  'categories':[{'name':'cuisine','value':'Tibetan'},
+                {'name':'meal','value':'dinner'},
+                {'name':'course','value':'side'}]
+
 }
 ];
 
@@ -102,41 +113,16 @@ function getCategoryValues(categoryName,callback) {
 function findByCategory(categoryName,categoryValue,callback) {
   //get value where recipe.categories.name=categoryName;
   var err = null;
-  callback(err, _.filter(testRecipes, {"categories.name":categoryName, "categories.value":categoryValue}));
-//  callback(err,_.union(_.map(_.filter(_.union.apply(_, _.map(testRecipes, 'categories')), {'name':categoryName}),'value')));
+  var results = [];
+
+  _.forEach(testRecipes, function(recipe) {
+      if ( _.findIndex(recipe.categories, {"name":categoryName, "value":categoryValue}) != -1 ) {
+        results.push(recipe);
+      }
+  });
+  callback(err, results);
 }
 
-//-----------------------------------
-/*
-function getListOfRecipeIds() {
-  return Object.keys(testRecipes);
-}
-
-function getRecipeCategoryNames(recipeId) {
-  var recipe = testRecipes[recipeId];
-  return _.map(recipe.categories, 'name');
-}
-
-function getRecipeCategories(recipeId) {
-  var recipe = testRecipes[recipeId];
-  return recipe.categories;
-}
-
-function getCategories(callback) {
-  var err = null;
-  callback(null, _.union.apply(_, getListOfRecipeIds().map(getRecipeCategoryNames) ) );
-}
-*/
-
-
-//function findByCategory(category,value,callback) {
-//  var err = null;
-//  callback(err, [{'category':category,'value':value,'name':'water'}]);
-//}
-
-//};
-
-//module.exports = Recipe;
 module.exports.findRecipes = findRecipes;
 module.exports.saveRecipe = saveRecipe;
 module.exports.createRecipe = createRecipe;
