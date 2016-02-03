@@ -9,7 +9,9 @@
   "author": "Ben Snyder",
   "license": "ISC",
   "dependencies": {
+    "kerberos": "0.0.18",
     "lodash": "^4.0.0",
+    "mongodb": "^2.1.4",
     "restify": "^4.0.3"
   }
 }
