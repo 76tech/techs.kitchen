@@ -48,22 +48,10 @@ var Application = React.createClass({
 
   render: function() {
     return (
-      <div className="container-fluid">
-        <div className="row">
-          <div className="col-md-4 text-center">
-            <RecipeCategoryList
-              onClickCategory = {this.clickCategory}
-              recipes = {this.state.recipes}
-            />
-          </div>
-          <div className="col-md-8">
-            <RecipeCategoryList
-              onClickCategory = {this.clickCategory}
-              recipes = {this.state.recipes}
-            />
-          </div>
-        </div>
-      </div>
+      <RecipeCategoryList
+        onClickCategory = {this.clickCategory}
+        recipes = {this.state.recipes}
+      />
     );
   }
 });
