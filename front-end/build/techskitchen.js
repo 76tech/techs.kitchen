@@ -38166,6 +38166,7 @@ ReactDOM.render(React.createElement(Application, null), document.getElementById(
 var React = require('react');
 
 var RecipeCategoryList = require('./RecipeCategoryList.react');
+var RecipeView = require('./RecipeView.react');
 
 var Application = React.createClass({
   displayName: 'Application',
@@ -38173,6 +38174,7 @@ var Application = React.createClass({
   getInitialState: function getInitialState() {
     return {
       recipes: [{
+        'id': 1,
         'name': 'Puttanesca Sauce',
         'description': 'Bold, spicy tomato based pasta sauce',
         'equipment': ['Saucepan', 'Wooden spoon'],
@@ -38180,35 +38182,68 @@ var Application = React.createClass({
         'method': ['Saute garlic, anchovy paste, red pepper flakes, and salt in olive oil until garlic is tender', 'Stir in tomatoes, olives, capers, sugar.  Simmer for 30 minutes.', 'Toss with pasta, sprinkle with basil.'],
         'categories': [{ 'name': 'cuisine', 'value': 'Italian' }, { 'name': 'meal', 'value': 'dinner' }, { 'name': 'course', 'value': 'main' }]
       }, {
+        'id': 2,
         'name': 'Spaghetti (boxed)',
         'description': 'Just boxed spaghetti',
         'ingredients': ['Spaghetti, 1 box', 'Water', 'Salt'],
         'method': ['Salt water in large pot.', 'Bring salted water to rolling boil', 'Add pasta to boiling water while stirring to prevent sticking', 'When water returns to boil, cook according to package directions, stirring occassionally'],
         'categories': [{ 'name': 'cuisine', 'value': 'Italian' }, { 'name': 'meal', 'value': 'dinner' }, { 'name': 'course', 'value': 'main' }]
-      }]
+      }],
+      activeview: "recipe",
+      activecategory: "",
+      activerecipe: 1
     };
   },
 
   clickCategory: function clickCategory(event, category) {
     event.preventDefault();
     alert('selected ' + category);
-    console.log(category);
+    this.setState({ activecategory: category,
+      activeview: 'category',
+      activerecipe: 1 });
+  },
+  clickRecipe: function clickRecipe(event, id) {
+    event.preventDefault();
+    this.setState({ activecategory: "",
+      activeview: 'recipe',
+      activerecipe: id });
+    //    console.log("Second");
+    //    console.log(this.state);
   },
   removeAllRecipes: function removeAllRecipes() {
     this.setState({ recipes: {} });
   },
 
   render: function render() {
-    return React.createElement(RecipeCategoryList, {
-      onClickCategory: this.clickCategory,
-      recipes: this.state.recipes
-    });
+    return React.createElement(
+      'div',
+      { className: 'HolyGrail-body' },
+      React.createElement(
+        'main',
+        { className: 'HolyGrail-content' },
+        React.createElement(RecipeView, {
+          onClickRecipe: this.clickRecipe,
+          activeview: this.state.activeview,
+          activecategory: this.state.activecategory,
+          activerecipe: this.state.activerecipe,
+          recipes: this.state.recipes
+        })
+      ),
+      React.createElement(
+        'nav',
+        { className: 'HolyGrail-nav' },
+        React.createElement(RecipeCategoryList, {
+          onClickCategory: this.clickCategory,
+          recipes: this.state.recipes
+        })
+      )
+    );
   }
 });
 
 module.exports = Application;
 
-},{"./RecipeCategoryList.react":312,"react":305}],312:[function(require,module,exports){
+},{"./RecipeCategoryList.react":312,"./RecipeView.react":313,"react":305}],312:[function(require,module,exports){
 'use strict';
 
 var React = require('react');
@@ -38257,7 +38292,7 @@ var RecipeCategoryList = React.createClass({
   formatCategoryEntryAsListElement: function formatCategoryEntryAsListElement(categoryEntry) {
     return React.createElement(
       MenuItem,
-      { key: categoryEntry, eventKey: categoryEntry },
+      { id: categoryEntry, key: categoryEntry, eventKey: categoryEntry, onSelect: this.props.onClickCategory },
       _.startCase(categoryEntry)
     );
   },
@@ -38265,7 +38300,7 @@ var RecipeCategoryList = React.createClass({
     var categoryEntryItems = this.getAllCategoryValues(category).map(this.formatCategoryEntryAsListElement);
     return React.createElement(
       DropdownButton,
-      { id: category, title: _.startCase(category), key: category, eventKey: category, onSelect: this.props.onClickCategory },
+      { id: category, title: _.startCase(category), key: category, eventKey: category },
       categoryEntryItems
     );
 
@@ -38280,7 +38315,7 @@ var RecipeCategoryList = React.createClass({
   },
   render: function render() {
     var recipeCategoryList = this.getAllCategories().map(this.formatCategoryAsListElement);
-    console.log(recipeCategoryList);
+    //    console.log(recipeCategoryList);
 
     return React.createElement(
       ButtonGroup,
@@ -38298,4 +38333,119 @@ var RecipeCategoryList = React.createClass({
 
 module.exports = RecipeCategoryList;
 
-},{"lodash":147,"react":305,"react-bootstrap/lib/Button":149,"react-bootstrap/lib/ButtonGroup":150,"react-bootstrap/lib/DropdownButton":153,"react-bootstrap/lib/MenuItem":156,"react-bootstrap/lib/Nav":157,"react-bootstrap/lib/NavItem":158}]},{},[310]);
+},{"lodash":147,"react":305,"react-bootstrap/lib/Button":149,"react-bootstrap/lib/ButtonGroup":150,"react-bootstrap/lib/DropdownButton":153,"react-bootstrap/lib/MenuItem":156,"react-bootstrap/lib/Nav":157,"react-bootstrap/lib/NavItem":158}],313:[function(require,module,exports){
+'use strict';
+
+var React = require('react');
+var _ = require('lodash');
+
+var RecipeView = React.createClass({
+  displayName: 'RecipeView',
+
+  formatAsListElement: function formatAsListElement(item) {
+    return React.createElement(
+      'li',
+      { key: item, eventKey: item },
+      item
+    );
+  },
+  formatNameAsListElement: function formatNameAsListElement(item) {
+    return React.createElement(
+      'li',
+      { key: item.id, eventKey: item.id, onSelect: this.props.onClickRecipe },
+      item.name
+    );
+  },
+  render: function render() {
+    var toRender;
+    //    console.log(this.props.activeview);
+    switch (this.props.activeview) {
+      case "recipe":
+        toRender = this.renderRecipe();
+        break;
+      case "category":
+        toRender = this.renderCategory();
+        break;
+      default:
+        toRender = React.createElement(
+          'div',
+          null,
+          'Error - Unknown render mode ',
+          this.props.activeview
+        );
+        break;
+    }
+    return toRender;
+  },
+  renderRecipe: function renderRecipe() {
+    //    console.log(this.props.recipe);
+    //this.props.activeview
+    //this.props.activecategory
+    var recipe = _.find(this.props.recipes, { 'id': this.props.activerecipe });
+    console.log(this.props.activerecipe);
+    var ingredients = recipe.ingredients.map(this.formatAsListElement);
+    var method = recipe.method.map(this.formatAsListElement);
+    return React.createElement(
+      'div',
+      null,
+      React.createElement(
+        'h1',
+        null,
+        recipe.name
+      ),
+      React.createElement(
+        'h2',
+        null,
+        recipe.description
+      ),
+      React.createElement(
+        'h3',
+        null,
+        'Ingredients:'
+      ),
+      React.createElement(
+        'ul',
+        null,
+        ingredients
+      ),
+      React.createElement(
+        'h3',
+        null,
+        'Method:'
+      ),
+      React.createElement(
+        'ul',
+        null,
+        method
+      )
+    );
+  },
+  renderCategory: function renderCategory() {
+    var activecategory = this.props.activecategory.toLowerCase();
+
+    var recipeList = [];
+    _.each(this.props.recipes, function (r) {
+      _.each(r.categories, function (c) {
+        if (c.value.toLowerCase() === activecategory) {
+          recipeList.push(r);
+        }
+      });
+    });
+    var recipeNames = recipeList.map(this.formatNameAsListElement);
+    //    console.log(recipeList);
+    //    return this.renderRecipe();
+    return React.createElement(
+      'div',
+      null,
+      React.createElement(
+        'ul',
+        null,
+        recipeNames
+      )
+    );
+  }
+});
+
+module.exports = RecipeView;
+
+},{"lodash":147,"react":305}]},{},[310]);

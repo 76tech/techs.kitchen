@@ -1,13 +1,14 @@
 var React = require('react');
 
 var RecipeCategoryList = require('./RecipeCategoryList.react');
+var RecipeView         = require('./RecipeView.react');
 
 var Application = React.createClass({
-
   getInitialState: function() {
     return {
       recipes: [
       {
+        'id':1,
         'name':'Puttanesca Sauce',
         'description':'Bold, spicy tomato based pasta sauce',
         'equipment':['Saucepan', 'Wooden spoon'],
@@ -23,6 +24,7 @@ var Application = React.createClass({
                       {'name':'course','value':'main'}]
       },
       {
+        'id':2,
         'name':'Spaghetti (boxed)',
         'description':'Just boxed spaghetti',
         'ingredients':['Spaghetti, 1 box', 'Water', 'Salt'],
@@ -33,14 +35,27 @@ var Application = React.createClass({
                       {'name':'meal','value':'dinner'},
                       {'name':'course','value':'main'}]
       }
-    ]
+      ],
+      activeview: "recipe",
+      activecategory: "",
+      activerecipe: 1
     }
   },
 
   clickCategory: function(event,category) {
     event.preventDefault();
     alert('selected ' + category);
-    console.log(category);
+    this.setState({activecategory: category,
+                   activeview: 'category',
+                   activerecipe: 1});
+  },
+  clickRecipe: function(event,id) {
+    event.preventDefault();
+    this.setState({activecategory: "",
+                   activeview: 'recipe',
+                   activerecipe: id});
+//    console.log("Second");
+//    console.log(this.state);
   },
   removeAllRecipes: function() {
     this.setState( { recipes: {} } );
@@ -48,10 +63,23 @@ var Application = React.createClass({
 
   render: function() {
     return (
-      <RecipeCategoryList
-        onClickCategory = {this.clickCategory}
-        recipes = {this.state.recipes}
-      />
+      <div className="HolyGrail-body">
+        <main className="HolyGrail-content">
+          <RecipeView
+            onClickRecipe =  {this.clickRecipe}
+            activeview =     {this.state.activeview}
+            activecategory = {this.state.activecategory}
+            activerecipe =   {this.state.activerecipe}
+            recipes =        {this.state.recipes}
+          />
+        </main>
+        <nav className="HolyGrail-nav">
+          <RecipeCategoryList
+            onClickCategory = {this.clickCategory}
+            recipes =         {this.state.recipes}
+          />
+        </nav>
+      </div>
     );
   }
 });

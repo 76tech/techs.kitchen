@@ -40,11 +40,11 @@ var RecipeCategoryList = React.createClass({
     return _.union.apply(_, this.getListOfRecipeIds().map(this.getRecipeCategoryNames) );
   },
   formatCategoryEntryAsListElement: function(categoryEntry) {
-    return <MenuItem key={categoryEntry} eventKey={categoryEntry}>{_.startCase(categoryEntry)}</MenuItem>
+    return <MenuItem id={categoryEntry} key={categoryEntry} eventKey={categoryEntry} onSelect={this.props.onClickCategory}>{_.startCase(categoryEntry)}</MenuItem>
   },
   formatCategoryAsListElement: function(category) {
     var categoryEntryItems = this.getAllCategoryValues(category).map(this.formatCategoryEntryAsListElement);
-    return <DropdownButton id={category} title={_.startCase(category)} key={category} eventKey={category} onSelect={this.props.onClickCategory}>{categoryEntryItems}</DropdownButton>;
+    return <DropdownButton id={category} title={_.startCase(category)} key={category} eventKey={category}>{categoryEntryItems}</DropdownButton>;
 
 //    return <NavItem key={category} eventKey={category}>{_.startCase(category)}</NavItem>;
     //return <NavItem eventKey={category}>{_.startCase(category)}</li>;
@@ -55,7 +55,7 @@ var RecipeCategoryList = React.createClass({
 alertalert: function() { alert('foo');},
   render: function() {
     var recipeCategoryList = this.getAllCategories().map(this.formatCategoryAsListElement);
-    console.log(recipeCategoryList);
+//    console.log(recipeCategoryList);
 
     return (
       <ButtonGroup vertical bsStyle="pills" stacked>
