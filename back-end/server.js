@@ -11,6 +11,7 @@ var port = process.env.PORT || 8080;
 
 var Recipe = require('./models/Recipe');
 var Config = require('./lib/Config');
+var Auth = require('./lib/Auth');
 
 // Server setup/config
 server.use(restify.acceptParser(server.acceptable));
@@ -19,6 +20,7 @@ server.use(restify.bodyParser({ mapParams: true }));
 
 var db;
 var recipes;
+var users;
 
 // Initialize db pool and start restify server
 MongoClient.connect("mongodb://"+Config.db.user+":"+Config.db.password+"@"+Config.db.host+":27017/"+Config.db.database, function(err, database) {
@@ -29,6 +31,7 @@ MongoClient.connect("mongodb://"+Config.db.user+":"+Config.db.password+"@"+Confi
 
   db = database;
   recipes = db.collection('recipes');
+  users = db.collection('users');
 
   server.listen(port, function() {
     console.log('%s listening at %s', server.name, server.url);
@@ -42,13 +45,39 @@ function handleResponse(res, err, resp) {
   res.json(resp);
 }
 
+function handleAuth(res, apikey, next, step) {
+    Auth.validateKey(users, apikey, function(err,resp){
+	if ( err != null ) {
+	    handleResponse(res, {error:auth.err}, null);
+	    return;
+	}
+	
+	if ( resp == null ) {
+	    handleResponse(res, {error:"Invalid Token"}, null);
+	    return;
+	}
+	console.log("Action performed by " + resp.name);
+	next(step);
+    });
+}
+
 // Generic requests/blank routes
 server.get('/', function(req, res) {
   res.json({message: 'Welcome to tkapi'});
 });
-server.post('/', function(req, res) {
-  res.json({message: 'Welcome to tkapi'});
+
+server.post('/', function(req, res, next) {
+    console.log("Hitting generic post endpoint");
+    handleAuth(res, req.headers.apikey, next, 'emptyPost');
 });
+
+server.post({
+    name: 'emptyPost',
+    path: '/'
+}, function(req, res) {
+    res.json({message: 'Welcome to tkapi'});    
+});
+
 
 // Recipe handling
 // return all recipes
@@ -59,13 +88,24 @@ server.get('/recipes', function(req,res) {
 });
 
 // create new recipe
-server.post('/recipes', function(req,res) {
-//  console.log(req.params);
-  Recipe.createRecipe(recipes, req.params, function(err,resp){
-    handleResponse(res, err, resp);
-  });
+server.post('/recipes', function(req,res,next) {
+    //  console.log(req.params);
+    //  Recipe.createRecipe(recipes, req.params, function(err,resp){
+    //   handleResponse(res, err, resp);
+    // });
+    next('postRecipe');
 });
 
+server.post({
+    name: 'postRecipe',
+    path: '/recipes'
+}, function(req,res) {
+    //  console.log(req.params);
+    Recipe.createRecipe(recipes, req.params, function(err,resp){
+	handleResponse(res, err, resp);
+    });
+});
+    
 //update a recipe
 server.put('/recipes', function(req,res) {
 //  console.log(req.params);
@@ -103,6 +143,7 @@ server.get('/recipes/id/:id', function(req,res) {
   });
 });
 
+// Get recipe by name
 server.get('/recipes/name/:name', function(req,res) {
   Recipe.findRecipesByName(recipes, req.params.name, function(err, resp) {
     handleResponse(res, err, resp);
