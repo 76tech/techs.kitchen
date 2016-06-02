@@ -1,7 +1,11 @@
-function validateKey(users, apikey, callback) {
+function Auth(db) {
+    this.users = db.collection('users');
+}
+
+Auth.prototype.validateKey = function(apikey, callback) {
     var auth = {'err':null, 'token':null};
 
-    users.find({'apikey':apikey}).toArray(function (err, result) {
+    this.users.find({'apikey':apikey}).toArray(function (err, result) {
 	if (err) {
 	    auth.err = err;
 	}
@@ -12,4 +16,4 @@ function validateKey(users, apikey, callback) {
     });
 }
 
-module.exports.validateKey = validateKey;
+module.exports = Auth;

@@ -5,13 +5,14 @@ var restify = require('restify');
 var mongodb = require('mongodb');
 var MongoClient = require('mongodb').MongoClient;
 var ObjectID = require('mongodb').ObjectID;
-
-var server = restify.createServer();
-var port = process.env.PORT || 8080;
+var _ = require('lodash');
 
 var Recipe = require('./models/Recipe');
 var Config = require('./lib/Config');
 var Auth = require('./lib/Auth');
+
+var server = restify.createServer();
+var port = process.env.PORT || 8080;
 
 // Server setup/config
 server.use(restify.acceptParser(server.acceptable));
@@ -19,34 +20,36 @@ server.use(restify.jsonp());
 server.use(restify.bodyParser({ mapParams: true }));
 
 var db;
-var recipes;
-var users;
+var auth;
+var recipe;
 
 // Initialize db pool and start restify server
 MongoClient.connect("mongodb://"+Config.db.user+":"+Config.db.password+"@"+Config.db.host+":27017/"+Config.db.database, function(err, database) {
-  if (err) {
-    console.log('Unable to connect to the mongodb. Error:', err);
-    return;
-  }
-
-  db = database;
-  recipes = db.collection('recipes');
-  users = db.collection('users');
-
-  server.listen(port, function() {
-    console.log('%s listening at %s', server.name, server.url);
-  });
+    if (err) {
+	console.log('Unable to connect to the mongodb. Error:', err);
+	return;
+    }
+    
+    db = database;
+    auth = new Auth(db);
+    recipe = new Recipe(db);
+    
+    server.listen(port, function() {
+	console.log('%s listening at %s', server.name, server.url);
+    });
 });
 
+// Generic response handler
 function handleResponse(res, err, resp) {
-  if (err) {
-    res.send(err);
-  }
-  res.json(resp);
+    if (err) {
+	res.send(err);
+    }
+    res.json(resp);
 }
 
-function handleAuth(res, apikey, next, step) {
-    Auth.validateKey(users, apikey, function(err,resp){
+// Authentication handler
+function handleAuth(res, apikey, nextStep) {
+    auth.validateKey(apikey, function(err,resp){
 	if ( err != null ) {
 	    handleResponse(res, {error:auth.err}, null);
 	    return;
@@ -57,63 +60,55 @@ function handleAuth(res, apikey, next, step) {
 	    return;
 	}
 	console.log("Action performed by " + resp.name);
-	next(step);
+	nextStep();
     });
 }
 
 // Generic requests/blank routes
 server.get('/', function(req, res) {
-  res.json({message: 'Welcome to tkapi'});
+    handleResponse(res, null, {message: 'Welcome to tkapi'});
 });
 
 server.post('/', function(req, res, next) {
     console.log("Hitting generic post endpoint");
-    handleAuth(res, req.headers.apikey, next, 'emptyPost');
-});
-
-server.post({
-    name: 'emptyPost',
-    path: '/'
-}, function(req, res) {
-    res.json({message: 'Welcome to tkapi'});    
+    handleAuth(res, req.headers.apikey, function(){ handleResponse(res, null, {message: 'Welcome to tkapi'}) });
 });
 
 
 // Recipe handling
 // return all recipes
 server.get('/recipes', function(req,res) {
-  Recipe.findRecipes(recipes, function(err,resp) {
-    handleResponse(res, err, resp);
-  });
+    recipe.findRecipes(function(err,resp) {
+	handleResponse(res, err, resp);
+    });
 });
 
 // create new recipe
 server.post('/recipes', function(req,res,next) {
-    //  console.log(req.params);
-    //  Recipe.createRecipe(recipes, req.params, function(err,resp){
-    //   handleResponse(res, err, resp);
-    // });
-    next('postRecipe');
+    var arr = _.keys(req);
+    console.log("req keys " + arr);
+
+    handleAuth(res, req.headers.apikey, function(){ next('postRecipe') });
 });
 
 server.post({
     name: 'postRecipe',
     path: '/recipes'
 }, function(req,res) {
-    //  console.log(req.params);
-    Recipe.createRecipe(recipes, req.params, function(err,resp){
+    console.log("req " + req.params);
+    recipe.createRecipe(req.params, function(err,resp){
 	handleResponse(res, err, resp);
     });
 });
-    
+
 //update a recipe
 server.put('/recipes', function(req,res) {
-//  console.log(req.params);
-  var id = new ObjectID(req.params.id);
-  delete req.params.id;
-  Recipe.saveRecipe(recipes, id, req.params, function(err, resp){
-    handleResponse(res, err, resp);
-  });
+    //  console.log(req.params);
+    var id = new ObjectID(req.params.id);
+    delete req.params.id;
+    recipe.saveRecipe(id, req.params, function(err, resp){
+	handleResponse(res, err, resp);
+    });
 });
 
 
@@ -125,50 +120,50 @@ server.opts('/recipes/:id', function(req, res, next) {
 });
 // delete a recipe
 server.del('/recipes/:id', function(req,res, next) {
-//  console.log("here");
-//  console.log(req.params);
-  var id = new ObjectID(req.params.id);
-//  handleResponse(res, null, {"ok":"ok"});
-
-  Recipe.deleteRecipe(recipes, id, function(err, resp){
-    handleResponse(res, err, resp);
-  });
+    //  console.log("here");
+    //  console.log(req.params);
+    var id = new ObjectID(req.params.id);
+    //  handleResponse(res, null, {"ok":"ok"});
+    
+    recipe.deleteRecipe(id, function(err, resp){
+	handleResponse(res, err, resp);
+    });
 });
 
 // Recipes by ID handling
 server.get('/recipes/id/:id', function(req,res) {
-  var id = new ObjectID(req.params.id);
-  Recipe.findRecipeById(recipes, id, function(err, resp){
-    handleResponse(res, err, resp);
-  });
+    var id = new ObjectID(req.params.id);
+    recipe.findRecipeById(id, function(err, resp){
+	handleResponse(res, err, resp);
+    });
 });
 
 // Get recipe by name
 server.get('/recipes/name/:name', function(req,res) {
-  Recipe.findRecipesByName(recipes, req.params.name, function(err, resp) {
-    handleResponse(res, err, resp);
-  });
+    recipe.findRecipesByName(req.params.name, function(err, resp) {
+	handleResponse(res, err, resp);
+    });
 });
 
 // Category handling
 // gets all categories - returns array of categories and all unique values
 server.get('/categories', function(req,res) {
-  Recipe.getCategoriesAndValues(recipes, function(err, resp) {
-    handleResponse(res, err, resp);
-  });
+    recipe.getCategoriesAndValues(function(err, resp) {
+	handleResponse(res, err, resp);
+    });
 });
 
 // gets all values for category
 server.get('/categories/:category', function(req,res) {
-  Recipe.getCategoryValues(recipes, req.params.category, function(err, resp) {
-    handleResponse(res, err, resp);
-  });
+    recipe.getCategoryValues(req.params.category, function(err, resp) {
+	handleResponse(res, err, resp);
+    });
 });
 
 // returns all recipes matching a category and value
 // ex. /recipes/meal/dinner
 server.get('/recipes/:category/:value', function(req,res) {
-  Recipe.findByCategory(recipes, req.params.category, req.params.value, function(err, resp) {
-    handleResponse(res, err, resp);
-  });
+    recipe.findByCategory(req.params.category, req.params.value, function(err, resp) {
+	handleResponse(res, err, resp);
+    });
 });

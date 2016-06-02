@@ -1,8 +1,12 @@
 var _ = require('lodash');
 
+function Recipe(db) {
+    this.recipes = db.collection('recipes');
+}
+
 // finds all recipes in collection, returns as an array
-function findRecipes(recipes, callback) {
-  recipes.find().toArray(function (err, result) {
+Recipe.prototype.findRecipes = function(callback) {
+  this.recipes.find().toArray(function (err, result) {
    if (err) {
      console.log(err);
    } else if (result.length) {
@@ -15,35 +19,47 @@ function findRecipes(recipes, callback) {
 }
 
 // create a new recipe, DOES NOT UPSERT!
-function createRecipe(recipes, params, callback) {
-  recipes.findOne({name: { $regex: new RegExp("^" + params.name + "$", 'i') } } , function (err, result) {
-   if (err) {
-     console.log(err);
-   }
-   if ( result != null ) {
-     // Document exists
-     callback(err, {"msg":"Recipe exists"});
-     return;
-   }
-   if ( _.isArray(params.categories) ) {
-     _.each(params.categories, function(cat, idx) {
-       params.categories[idx].name = cat.name.toLowerCase();
-       params.categories[idx].value = cat.value.toLowerCase();
-     })
-   }
-   recipes.insertOne(params, function(err, result) {
-     if (err) {
-       console.log(err);
-     }
-     callback(err, {"msg":"Recipe added", "result":result});
-   });
-   console.log(params);
- });
+Recipe.prototype.createRecipe = function(params, callback) {
+    var recipes = this.recipes;
+    console.log("params " + params.name);
+
+    console.log("params");
+    var arr = _.keys(params);
+    console.log("arr keys " + arr);
+    _.each(arr, function(a) {
+	console.log(a);
+    });
+    _.forOwn(params, function(val,key) {
+	console.log(key + " -> " + val);
+    });
+    this.recipes.findOne({name: { $regex: new RegExp("^" + params.name + "$", 'i') } } , function (err, result) {
+	if (err) {
+	    console.log(err);
+	}
+	if ( result != null ) {
+	    // Document exists
+	    callback(err, {"msg":"Recipe exists"});
+	    return;
+	}
+	if ( _.isArray(params.categories) ) {
+	    _.each(params.categories, function(cat, idx) {
+		params.categories[idx].name = cat.name.toLowerCase();
+		params.categories[idx].value = cat.value.toLowerCase();
+	    })
+		}
+	recipes.insertOne(params, function(err, result) {
+	    if (err) {
+		console.log(err);
+	    }
+	    callback(err, {"msg":"Recipe added", "result":result});
+	});
+	console.log(params);
+    });
 }
 
 // Updates an existing recipe
-function saveRecipe(recipes, id, params, callback) {
-  recipes.update({_id:id}, params, function(err, results) {
+Recipe.prototype.saveRecipe = function(id, params, callback) {
+  this.recipes.update({_id:id}, params, function(err, results) {
     if (err) {
       console.log(err);
     }
@@ -54,8 +70,8 @@ function saveRecipe(recipes, id, params, callback) {
 }
 
 // Deletes a recipe by ID
-function deleteRecipe(recipes, id, callback) {
-  recipes.deleteOne({_id:id}, function(err, results) {
+Recipe.prototype.deleteRecipe = function(id, callback) {
+  this.recipes.deleteOne({_id:id}, function(err, results) {
     if (err) {
       console.log(err);
     }
@@ -66,8 +82,8 @@ function deleteRecipe(recipes, id, callback) {
 }
 
 // return one recipe by ID
-function findRecipeById(recipes, id, callback) {
-  recipes.find({_id:id}).toArray(function (err, result) {
+Recipe.prototype.findRecipeById = function(id, callback) {
+  this.recipes.find({_id:id}).toArray(function (err, result) {
    if (err) {
      console.log(err);
    }
@@ -76,8 +92,8 @@ function findRecipeById(recipes, id, callback) {
 }
 
 // Searches recipes by name, case insensitive and partial matching
-function findRecipesByName(recipes, recipeName, callback) {
-   recipes.find({name: { $regex: new RegExp(recipeName, 'i') } } ).toArray(function (err, result) {
+Recipe.prototype.findRecipesByName = function(recipeName, callback) {
+   this.recipes.find({name: { $regex: new RegExp(recipeName, 'i') } } ).toArray(function (err, result) {
     if (err) {
       console.log(err);
     }
@@ -86,8 +102,8 @@ function findRecipesByName(recipes, recipeName, callback) {
 }
 
 // returns all categories and their values
-function getCategoriesAndValues(recipes, callback) {
-  recipes.find({},{'categories':1,'_id':0}).toArray(function (err, results) {
+Recipe.prototype.getCategoriesAndValues = function(callback) {
+  this.recipes.find({},{'categories':1,'_id':0}).toArray(function (err, results) {
 //    callback(err, results);
     var categories = [];
     _.each(_.flatten(_.map(results, 'categories')), function(category) {
@@ -105,17 +121,17 @@ function getCategoriesAndValues(recipes, callback) {
 }
 
 // get all values for a category
-function getCategoryValues(recipes, categoryName, callback) {
+Recipe.prototype.getCategoryValues = function(categoryName, callback) {
   //get value where recipe.categories.name=categoryName;
-  recipes.find({},{'categories':1,'_id':0}).toArray(function (err, results) {
+  this.recipes.find({},{'categories':1,'_id':0}).toArray(function (err, results) {
     callback(err,_.union(_.map(_.filter(_.union.apply(_, _.map(results, 'categories')), {'name': categoryName.toLowerCase()}),'value')));
   });
 }
 
 // returns list of recipes matching category and value
-function findByCategory(recipes, categoryName, categoryValue, callback) {
+Recipe.prototype.findByCategory = function(categoryName, categoryValue, callback) {
   //get value where recipe.categories.name=categoryName;
-  recipes.find({
+  this.recipes.find({
     'categories': {
       $elemMatch: {
         'name': categoryName.toLowerCase(),
@@ -127,12 +143,4 @@ function findByCategory(recipes, categoryName, categoryValue, callback) {
   });
 }
 
-module.exports.findRecipes = findRecipes;
-module.exports.saveRecipe = saveRecipe;
-module.exports.createRecipe = createRecipe;
-module.exports.deleteRecipe = deleteRecipe;
-module.exports.findRecipeById = findRecipeById;
-module.exports.findRecipesByName = findRecipesByName;
-module.exports.getCategoriesAndValues = getCategoriesAndValues;
-module.exports.getCategoryValues = getCategoryValues;
-module.exports.findByCategory = findByCategory;
+module.exports = Recipe;
